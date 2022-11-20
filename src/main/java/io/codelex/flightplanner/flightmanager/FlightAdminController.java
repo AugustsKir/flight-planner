@@ -2,7 +2,6 @@ package io.codelex.flightplanner.flightmanager;
 
 import io.codelex.flightplanner.flightmanager.domain.Flight;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,12 +17,6 @@ public class FlightAdminController {
         this.flightService = flightService;
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleBadInput() {
-
-        return "Bad input, make sure you entered everything correctly!";
-    }
 
     @PutMapping("/flights")
     @ResponseStatus(HttpStatus.CREATED)
@@ -49,14 +42,14 @@ public class FlightAdminController {
     }
 
     @DeleteMapping("/flights/{id}")
-    public void deleteFlight(@PathVariable String id) {
+    public void deleteFlight(@PathVariable Integer id) {
 
-        this.flightService.deleteFlight(id);
+        flightService.deleteFlight(id);
     }
 
     @GetMapping("/flights/{id}")
-    public Flight getFlight(@PathVariable String id) {
-        return this.flightService.findFlightsByID(id);
+    public Flight getFlight(@PathVariable Integer id) {
+        return flightService.findFlightsByID(id);
     }
 
 }

@@ -28,17 +28,17 @@ public class FlightCustomerController {
 
     @GetMapping("/airports")
     private List<Airport> findAirport(@RequestParam String search) {
-        return this.flightService.findAirportByInput(search);
+        return flightService.findAirportByInput(search);
     }
 
     @GetMapping("/flights/{id}")
-    public Flight getFlight(@PathVariable String id) {
-        return this.flightService.findFlightsByID(id);
+    public Flight getFlight(@PathVariable Integer id) {
+        return flightService.findFlightsByID(id);
     }
 
     @PostMapping("/flights/search")
     private PageResult searchFlights(@Valid @RequestBody SearchFlightRequest req) {
-        return this.flightService.searchFlights(req);
+        return flightService.searchFlights(req);
 
     }
 }
