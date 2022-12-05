@@ -1,67 +1,95 @@
 package io.codelex.flightplanner.flightmanager.domain;
 
-import org.springframework.lang.NonNull;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "FLIGHTS")
 public class Flight {
-    private static final AtomicInteger nextID = new AtomicInteger(1);
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "serial", name = "id", updatable = false, nullable = false)
+    private Long id;
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "airport_from")
     @Valid
-    @NotNull
-    private final Airport from;
+    private Airport from;
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "airport_to")
     @Valid
-    @NotNull
-    private final Airport to;
+    private Airport to;
     @NotBlank
-    @NotNull
-    private final String carrier;
-    @NotBlank
-    @NotNull
-    private final String departureTime;
-    @NotBlank
-    @NotNull
-    private final String arrivalTime;
-    private final Integer id;
+    @JsonProperty("carrier")
+    @Column(name = "airline")
+    private String carrier;
 
-    public Flight(@NonNull Airport from, @NonNull Airport to, @NonNull String carrier, @NonNull String departureTime, @NonNull String arrivalTime) {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Column(name = "departure_time")
+    @JsonProperty("departureTime")
+    private LocalDateTime departureTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Column(name = "arrival_time")
+    @JsonProperty("arrivalTime")
+    private LocalDateTime arrivalTime;
+
+    protected Flight() {
+    }
+
+    public Flight(Long id, Airport from, Airport to, String carrier, LocalDateTime departureTimeText, LocalDateTime arrivalTimeText) {
+        this.id = id;
         this.from = from;
         this.to = to;
         this.carrier = carrier;
-        this.departureTime = departureTime;
-        this.arrivalTime = arrivalTime;
-        this.id = nextID.getAndIncrement();
+        this.departureTime = departureTimeText;
+        this.arrivalTime = arrivalTimeText;
     }
 
-    @NonNull
-    public Airport getFrom() {
-        return from;
-    }
-
-    @NonNull
-    public Airport getTo() {
-        return to;
-    }
-
-    @NonNull
-    public String getDepartureTime() {
-        return departureTime;
-    }
-
-    @NonNull
-    public String getArrivalTime() {
-        return arrivalTime;
-    }
-
-    @NonNull
     public String getCarrier() {
         return carrier;
     }
 
-    public Integer getId() {
+    @NotNull
+    public Airport getFrom() {
+        return from;
+    }
+
+    public void setFrom(Airport from) {
+        this.from = from;
+    }
+
+    @NotNull
+    public Airport getTo() {
+        return to;
+    }
+
+    public void setTo(Airport to) {
+        this.to = to;
+    }
+
+    @NotNull
+    public LocalDateTime getDepartureTime() {
+        return departureTime;
+    }
+
+    @NotNull
+    public LocalDateTime getArrivalTime() {
+        return arrivalTime;
+    }
+
+
+    public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

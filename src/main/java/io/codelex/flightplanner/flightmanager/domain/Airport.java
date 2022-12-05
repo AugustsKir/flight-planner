@@ -1,17 +1,29 @@
 package io.codelex.flightplanner.flightmanager.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 
-import javax.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 import java.util.Objects;
 
+@Entity
+@Table(name = "AIRPORTS")
 public class Airport {
-    @NotBlank
-    private final String country;
-    @NotBlank
-    private final String city;
-    @NotBlank
-    private final String airport;
+    @NotEmpty
+    @JsonProperty("country")
+    private String country;
+    @NotEmpty
+    @JsonProperty("city")
+    private String city;
+    @NotEmpty
+    @Id
+    @JsonProperty("airport")
+    @Column(name = "airport_id")
+    private String airport;
 
 
     public Airport(String country, String city, String airport) {
@@ -19,6 +31,10 @@ public class Airport {
         this.city = city;
         this.airport = airport;
     }
+
+    public Airport() {
+    }
+
 
     public String getCountry() {
         return country;
