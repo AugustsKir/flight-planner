@@ -7,18 +7,18 @@ import io.codelex.flightplanner.flightmanager.dto.SearchFlightRequest;
 import io.codelex.flightplanner.flightmanager.repository.AirportRepository;
 import io.codelex.flightplanner.flightmanager.repository.FlightRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @ConditionalOnProperty(prefix = "flight-app", name = "storage", havingValue = "database")
-public class FlightServiceDB implements FlightService {
+public class FlightServiceDB extends AbstractFlightService implements FlightService {
     private final FlightRepository flightRepository;
     private final AirportRepository airportRepository;
 
@@ -28,8 +28,9 @@ public class FlightServiceDB implements FlightService {
     }
 
     @Override
-    public void clearFlights() {
+    public void clearData() {
         flightRepository.deleteAll();
+        airportRepository.deleteAll();
     }
 
     @Transactional
@@ -55,8 +56,19 @@ public class FlightServiceDB implements FlightService {
     }
 
     @Override
+    public boolean isValidAirports(Flight req) {
+        return super.isValidAirports(req);
+    }
+
+    @Override
+    @Transactional
     public boolean isNotRepeated(Flight flight) {
-        return flightRepository.findAll().stream().noneMatch(f -> f.equals(flight));
+        return !flightRepository.exists(Example.of(flight));
+    }
+
+    @Override
+    public boolean isDateValid(Flight flight) {
+        return super.isDateValid(flight);
     }
 
     @Override
@@ -65,21 +77,8 @@ public class FlightServiceDB implements FlightService {
     }
 
     @Override
-    public List<Airport> findAirportByInput(String search) {
-        String trimmedString = search.replaceAll(" ", "").toLowerCase();
-        List<Airport> outList = new ArrayList<>();
-        for (Flight flight : flightRepository.findAll()) {
-            if (flight.getFrom().getAirport().toLowerCase().contains(trimmedString) ||
-                    flight.getFrom().getCity().toLowerCase().contains(trimmedString) ||
-                    flight.getFrom().getCountry().toLowerCase().contains(trimmedString)) {
-                outList.add(flight.getFrom());
-            }
-        }
-        if (outList.size() > 0) {
-            return outList;
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+    public List<Airport> findAirportByInput(String input) {
+        return airportRepository.findAirportByInput(input.toLowerCase().replaceAll(" ", ""));
     }
 
     @Override
@@ -89,22 +88,16 @@ public class FlightServiceDB implements FlightService {
 
     @Override
     public PageResult searchFlights(SearchFlightRequest req) {
-        List<Flight> eligibleFlights = new ArrayList<>();
-        if (req.getTo().equals(req.getFrom())) {
+        if (!req.getFrom().equals(req.getTo())) {
+            List<Flight> eligibleFlights = flightRepository.findFlights(req.getFrom(), req.getTo(), req.getDepartureDate().atStartOfDay());
+            if (eligibleFlights.isEmpty()) {
+                return new PageResult(0, 0, eligibleFlights);
+            } else {
+                return new PageResult(0, eligibleFlights.size(), eligibleFlights);
+            }
+        } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        for (Flight flight : flightRepository.findAll()) {
-            if (req.getFrom().equals(flight.getFrom().getAirport())
-                    && req.getTo().equals(flight.getTo().getAirport())
-                    && flight.getDepartureTime().getDayOfYear() == req.getDepartureDate().getDayOfYear()) {
-                eligibleFlights.add(flight);
-            }
 
-        }
-        if (eligibleFlights.isEmpty()) {
-            return new PageResult(0, 0, eligibleFlights);
-        } else {
-            return new PageResult(0, eligibleFlights.size(), eligibleFlights);
-        }
     }
 }

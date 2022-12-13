@@ -8,21 +8,17 @@ import io.codelex.flightplanner.flightmanager.dto.SearchFlightRequest;
 import java.util.List;
 
 public interface FlightService {
-    void clearFlights();
+    void clearData();
 
     void addFlight(Flight req);
 
     void deleteFlight(Long id);
 
-    default boolean isValidAirports(Flight req) {
-        return !req.getFrom().getAirport().replaceAll("[^A-Za-z]", "").equalsIgnoreCase(req.getTo().getAirport().replaceAll("[^A-Za-z]", ""));
-    }
+    boolean isValidAirports(Flight req);
 
     boolean isNotRepeated(Flight flight);
 
-    default boolean isDateValid(Flight flight) {
-        return flight.getDepartureTime().isBefore(flight.getArrivalTime());
-    }
+    boolean isDateValid(Flight flight);
 
     List<Flight> flightList();
 

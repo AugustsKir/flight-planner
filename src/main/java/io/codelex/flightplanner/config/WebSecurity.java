@@ -16,8 +16,8 @@ public class WebSecurity {
 
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/**").anonymous()
-                .antMatchers("/testing-api/**").anonymous()
+                .antMatchers("/api/**").permitAll()
+                .antMatchers("/testing-api/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();

@@ -16,7 +16,7 @@ import java.util.Objects;
 
 @Service
 @ConditionalOnProperty(prefix = "flight-app", name = "storage", havingValue = "in-memory")
-public class FlightServiceInMemory implements FlightService {
+public class FlightServiceInMemory extends AbstractFlightService implements FlightService {
 
 
     private final InMemoryRepository repository;
@@ -26,7 +26,7 @@ public class FlightServiceInMemory implements FlightService {
     }
 
     @Override
-    public void clearFlights() {
+    public void clearData() {
         repository.clearFlights();
     }
 
@@ -41,6 +41,11 @@ public class FlightServiceInMemory implements FlightService {
     }
 
     @Override
+    public boolean isDateValid(Flight flight) {
+        return super.isDateValid(flight);
+    }
+
+    @Override
     public List<Flight> flightList() {
         return repository.getFlights();
     }
@@ -48,6 +53,11 @@ public class FlightServiceInMemory implements FlightService {
     @Override
     public void deleteFlight(Long id) {
         repository.deleteFlight(id);
+    }
+
+    @Override
+    public boolean isValidAirports(Flight req) {
+        return super.isValidAirports(req);
     }
 
     @Override

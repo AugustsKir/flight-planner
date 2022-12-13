@@ -16,6 +16,6 @@ public class FlightTestController {
 
     @PostMapping("/clear")
     public void clearFlights() {
-        flightService.clearFlights();
+        flightService.clearData();
     }
 }
