@@ -1,6 +1,7 @@
-package io.codelex.flightplanner.flightmanager;
+package io.codelex.flightplanner.flightmanager.controllers;
 
 import io.codelex.flightplanner.flightmanager.domain.Flight;
+import io.codelex.flightplanner.flightmanager.service.FlightService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,13 +43,13 @@ public class FlightAdminController {
     }
 
     @DeleteMapping("/flights/{id}")
-    public void deleteFlight(@PathVariable Integer id) {
+    public void deleteFlight(@PathVariable Long id) {
 
         flightService.deleteFlight(id);
     }
 
     @GetMapping("/flights/{id}")
-    public Flight getFlight(@PathVariable Integer id) {
+    public Flight getFlight(@PathVariable Long id) {
         return flightService.findFlightsByID(id);
     }
 

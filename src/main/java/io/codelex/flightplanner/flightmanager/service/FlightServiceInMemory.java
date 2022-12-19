@@ -1,63 +1,70 @@
-package io.codelex.flightplanner.flightmanager;
+package io.codelex.flightplanner.flightmanager.service;
 
 import io.codelex.flightplanner.flightmanager.domain.Airport;
 import io.codelex.flightplanner.flightmanager.domain.Flight;
-import io.codelex.flightplanner.flightmanager.domain.PageResult;
-import io.codelex.flightplanner.flightmanager.domain.SearchFlightRequest;
+import io.codelex.flightplanner.flightmanager.dto.PageResult;
+import io.codelex.flightplanner.flightmanager.dto.SearchFlightRequest;
+import io.codelex.flightplanner.flightmanager.repository.InMemoryRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Service
-public class FlightService {
-    private final FlightRepo repository;
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+@ConditionalOnProperty(prefix = "flight-app", name = "storage", havingValue = "in-memory")
+public class FlightServiceInMemory extends AbstractFlightService implements FlightService {
 
-    public FlightService(FlightRepo repository) {
+
+    private final InMemoryRepository repository;
+
+    public FlightServiceInMemory(InMemoryRepository repository) {
         this.repository = repository;
     }
 
-    public void clearFlights() {
+    @Override
+    public void clearData() {
         repository.clearFlights();
     }
 
+    @Override
     public void addFlight(Flight req) {
         repository.addFlight(req);
     }
 
-    public boolean isValidAirports(Flight req) {
-        return !req.getFrom().getAirport().replaceAll("[^A-Za-z]", "").equalsIgnoreCase(req.getTo().getAirport().replaceAll("[^A-Za-z]", ""));
-    }
-
+    @Override
     public boolean isNotRepeated(Flight flight) {
-        return flightList().stream().noneMatch(f -> f.equals(flight));
+        return repository.getFlights().stream().noneMatch(f -> f.equals(flight));
     }
 
+    @Override
     public boolean isDateValid(Flight flight) {
-        LocalDateTime arrival = LocalDateTime.parse(flight.getArrivalTime(), formatter);
-        LocalDateTime departure = LocalDateTime.parse(flight.getDepartureTime(), formatter);
-        return departure.isBefore(arrival);
-
+        return super.isDateValid(flight);
     }
 
+    @Override
     public List<Flight> flightList() {
-        return repository.flightList;
+        return repository.getFlights();
     }
 
-    public void deleteFlight(Integer id) {
+    @Override
+    public void deleteFlight(Long id) {
         repository.deleteFlight(id);
     }
 
+    @Override
+    public boolean isValidAirports(Flight req) {
+        return super.isValidAirports(req);
+    }
+
+    @Override
     public List<Airport> findAirportByInput(String search) {
         String trimmedString = search.replaceAll(" ", "").toLowerCase();
         List<Airport> outList = new ArrayList<>();
-        for (Flight flight : repository.flightList) {
+        for (Flight flight : repository.getFlights()) {
             if (flight.getFrom().getAirport().toLowerCase().contains(trimmedString) ||
                     flight.getFrom().getCity().toLowerCase().contains(trimmedString) ||
                     flight.getFrom().getCountry().toLowerCase().contains(trimmedString)) {
@@ -71,23 +78,25 @@ public class FlightService {
         }
     }
 
-    public Flight findFlightsByID(Integer id) {
-        List<Flight> output = flightList().stream().filter(f -> Objects.equals(f.getId(), id)).toList();
+    @Override
+    public synchronized Flight findFlightsByID(Long id) {
+        List<Flight> output = repository.getFlights().stream().filter(f -> Objects.equals(f.getId(), id)).toList();
         if (output.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Flight not found! ");
         } else return output.get(0);
     }
 
+    @Override
     public PageResult searchFlights(SearchFlightRequest req) {
         List<Flight> eligibleFlights = new ArrayList<>();
         if (req.getTo().equals(req.getFrom())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        for (Flight flight : repository.flightList) {
+        for (Flight flight : repository.getFlights()) {
 
             if (req.getFrom().equals(flight.getFrom().getAirport())
                     && req.getTo().equals(flight.getTo().getAirport())
-                    && LocalDateTime.parse(flight.getDepartureTime(), formatter).getDayOfYear() == LocalDateTime.parse(req.getDepartureDate(), formatter).getDayOfYear()) {
+                    && flight.getDepartureTime().getDayOfYear() == req.getDepartureDate().getDayOfYear()) {
                 eligibleFlights.add(flight);
             }
 

@@ -10,10 +10,15 @@ public class WebSecurity {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .headers()
+                .frameOptions()
+                .disable();
+
+        http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/admin-api/**").authenticated()
-                .anyRequest().anonymous()
+                .antMatchers("/api/**").permitAll()
+                .antMatchers("/testing-api/**").permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .httpBasic();
 

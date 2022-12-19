@@ -1,9 +1,10 @@
-package io.codelex.flightplanner.flightmanager;
+package io.codelex.flightplanner.flightmanager.controllers;
 
 import io.codelex.flightplanner.flightmanager.domain.Airport;
 import io.codelex.flightplanner.flightmanager.domain.Flight;
-import io.codelex.flightplanner.flightmanager.domain.PageResult;
-import io.codelex.flightplanner.flightmanager.domain.SearchFlightRequest;
+import io.codelex.flightplanner.flightmanager.dto.PageResult;
+import io.codelex.flightplanner.flightmanager.dto.SearchFlightRequest;
+import io.codelex.flightplanner.flightmanager.service.FlightService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +33,12 @@ public class FlightCustomerController {
     }
 
     @GetMapping("/flights/{id}")
-    public Flight getFlight(@PathVariable Integer id) {
+    public Flight getFlight(@PathVariable Long id) {
         return flightService.findFlightsByID(id);
     }
 
     @PostMapping("/flights/search")
-    private PageResult searchFlights(@Valid @RequestBody SearchFlightRequest req) {
+    private synchronized PageResult searchFlights(@RequestBody @Valid SearchFlightRequest req) {
         return flightService.searchFlights(req);
 
     }

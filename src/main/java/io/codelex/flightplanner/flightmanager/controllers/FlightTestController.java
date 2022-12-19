@@ -1,5 +1,6 @@
-package io.codelex.flightplanner.flightmanager;
+package io.codelex.flightplanner.flightmanager.controllers;
 
+import io.codelex.flightplanner.flightmanager.service.FlightService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,6 @@ public class FlightTestController {
 
     @PostMapping("/clear")
     public void clearFlights() {
-        flightService.clearFlights();
+        flightService.clearData();
     }
 }

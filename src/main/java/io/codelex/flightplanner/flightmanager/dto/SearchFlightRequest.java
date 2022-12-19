@@ -1,21 +1,26 @@
-package io.codelex.flightplanner.flightmanager.domain;
+package io.codelex.flightplanner.flightmanager.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class SearchFlightRequest {
-    @NotBlank
-    @NotNull
-    private final String from;
-    @NotBlank
-    @NotNull
-    private final String to;
-    @NotBlank
-    @NotNull
-    private final String departureDate;
 
-    public SearchFlightRequest(String from, String to, String departureDate) {
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotNull
+    private final LocalDate departureDate;
+    @JsonProperty("from")
+    @NotBlank
+    private String from;
+    @JsonProperty("to")
+    @NotBlank
+    private String to;
+
+    public SearchFlightRequest(String from, String to, LocalDate departureDate) {
         this.from = from;
         this.to = to;
         this.departureDate = departureDate;
@@ -29,7 +34,7 @@ public class SearchFlightRequest {
         return to;
     }
 
-    public String getDepartureDate() {
+    public LocalDate getDepartureDate() {
         return departureDate;
     }
 
